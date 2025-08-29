@@ -18,20 +18,16 @@ from runcase import *
 import pandas as pd
 
 setGrid()
-setPhysics(impFrac=0,fluxLimit=True)
-setDChi(kye=0.36, kyi=0.36, difni=0.5,nonuniform = True, kye_sol=0.56)
-setBoundaryConditions(ncore=6.2e19, pcoree=4.0e6, pcorei=4.0e6, recycp=0.95, owall_puff=0)
+setPhysics(impFrac=0, fluxLimit=True)
+setDChi(kye=1.0, kyi=1.0, difni=0.5, nonuniform=True)
+setBoundaryConditions(ncore=6.2e19, pcoree=2.0e6, pcorei=2.0e6, recycp=0.98)
 setimpmodel(impmodel=True)
 
-
-bbb.cion=3
-bbb.oldseec=0
-bbb.restart=1
+bbb.cion = 3
+bbb.oldseec = 0
+bbb.restart = 1
 bbb.nusp_imp = 3
-bbb.icntnunk=0
-bbb.kye=0.36
-bbb.kyi = 0.36
-setDChi(kye=0.36, kyi=0.36, difni=0.5,nonuniform = True, kye_sol=0.56)
+bbb.icntnunk = 0
 
 hdf5_restore("./final.hdf5")
 
@@ -47,7 +43,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-dt = 10e-3  # 20 ms
+dt = 40e-3  # 20 ms
 
 current_dir = os.getcwd()
 hdf5_dir = os.path.join(current_dir, "run_last_iterations")
@@ -89,9 +85,6 @@ for i in range(nx):
         bbb.exmain()
         bbb.plateflux()
         bbb.pradpltwl()
-        q_data = (bbb.sdrrb + bbb.sdtrb).reshape(-1)
-        q_max = np.max(q_data)
-
 
         # --- Standard power/particle balance ---
         imp_target_Odiv = np.sum(bbb.pwr_pltz[:, 1]*com.sxnp[com.nx+1,:]) / 1e6
@@ -166,7 +159,7 @@ for i in range(nx):
         Li_source_odiv =  (np.sum(bbb.fngxrb_use[:, 1, 0]) +np.sum(bbb.sputflxrb))/1e21 
         Li_source_idiv =   (np.sum(np.abs(bbb.sputflxlb)))/1e21
         Li_all_flux =  np.sum(abs(bbb.fngx[com.nx,:,1])) + np.sum(abs(bbb.fngx[0,:,1])) + np.sum(abs(bbb.fngy[:,com.ny,1])) + np.sum(abs(bbb.fngy[:,0,1]))
-        Li_source = Li_source_odiv + Li_source_idiv
+
 
         # Plasma pump-out (non-recycled Li ions)
         Plasma_pump_Odiv = np.sum((1-bbb.recycp[1])*bbb.fnix[com.nx,:,2:5]) / 1e21
@@ -176,7 +169,7 @@ for i in range(nx):
 
         # --- Collect all output ---
         output_data.append([
-            time_value, q_max, P_SOL, pcore, pInnerTarget, pOuterTarget, pCFWall,
+            time_value, P_SOL, pcore, pInnerTarget, pOuterTarget, pCFWall,
             prad_all, pPFR, fniy_core, fniy_wall, fnix_odiv, fnix_idiv,
             S_ion_D, recombination,
             imp_target_Odiv, imp_target_Idiv, imp_wall, imp_PFR,
@@ -192,7 +185,7 @@ for i in range(nx):
 
 
 columns = [
-    "time [s]", "q_max [W/m2]", "P_SOL [MW]", "P_core [MW]", "P_inner [MW]", "P_outer [MW]", "P_wall [MW]",
+    "time [s]", "P_SOL [MW]", "P_core [MW]", "P_inner [MW]", "P_outer [MW]", "P_wall [MW]",
     "P_rad [MW]", "P_PFR [MW]", "Gamma_core [1e22/s]", "Gamma_wall [1e22/s]",
     "Gamma_ODiv [1e22/s]", "Gamma_IDiv [1e22/s]", "Ionization [1e22/s]", "Recombination [1e22/s]",
     "imp_target_Odiv [MW]", "imp_target_Idiv [MW]", "imp_wall [MW]", "imp_PFR [MW]",
@@ -212,18 +205,6 @@ df["P_total [MW]"] = (
     df["P_wall [MW]"] +
     df["P_rad [MW]"] + df["P_PFR [MW]"]
 )
-
-
-plt.figure(figsize=(5,3))
-plt.plot(df["time [s]"], df["q_max [W/m2]"]/1e6, label="Li Source")
-plt.xlabel("Time [s]", fontsize=16)
-plt.ylabel("q$_{\perp}^{max}$ [MW/m$^2$]", fontsize=16)
-plt.legend()
-plt.ylim([0, np.max(df["q_max [W/m2]"]/1e6)*1.05])
-plt.grid(True)
-plt.tight_layout()
-plt.savefig('peak_heat.png', dpi=300)
-plt.show()
 
 
 plt.figure(figsize=(5,3))
@@ -555,7 +536,7 @@ axs[0].plot(df["time [s]"], df["Li_source_idiv [1e21/s]"], label="Idiv", linewid
 axs[0].set_ylabel(r'$\phi_{Li}^{source}$ (10$^{21}$ /s)', fontsize=16)
 axs[0].set_yscale('log')
 axs[0].set_ylim([1e-2, 100])
-axs[0].set_xlim([0, 1.2])
+axs[0].set_xlim([0, 5])
 axs[0].tick_params(axis='both', labelsize=14)
 axs[0].minorticks_on()
 axs[0].grid(True, which='major', linestyle='-', linewidth=1.0, alpha=0.8)
@@ -603,8 +584,8 @@ line_dep_wall, = ax.plot(df["time [s]"], df["Li_ion_strike_wall [1e21/s]"], labe
 ax.set_xlabel(r't$_{simulation}$ (s)', fontsize=16)
 ax.set_ylabel(r'Li flux (10$^{21}$ /s)', fontsize=16)
 ax.set_yscale('log')
-ax.set_ylim([1e-2, 500])
-ax.set_xlim([0, 2])
+ax.set_ylim([1e-2, 100])
+ax.set_xlim([0, 5])
 ax.tick_params(axis='both', labelsize=14)
 ax.minorticks_on()
 ax.grid(True, which='major', linestyle='-', linewidth=1.0, alpha=0.8)
@@ -626,22 +607,4 @@ ax.add_artist(legend1)  # Add the first legend manually
 
 plt.tight_layout()
 plt.savefig('Li_flux_x_single_top_outside.png', dpi=600, bbox_inches='tight')
-plt.show()
-
-
-plt.figure(figsize=(5,3))
-plt.plot(df["time [s]"], df["P_outer [MW]"], marker='o', label="Odiv")
-plt.plot(df["time [s]"], df["P_inner [MW]"], marker='s', label="Idiv")
-plt.plot(df["time [s]"], df["P_wall [MW]"], marker='^', label="O-wall")
-plt.plot(df["time [s]"], df["P_rad [MW]"], marker='d', label="P-rad")
-plt.xlabel("t$_{simulation}$ (s)", fontsize=14)
-plt.ylabel("Power (MW)", fontsize=14)
-
-plt.legend(fontsize=12, ncol =2)
-plt.xlim([0, np.max(df["time [s]"])*1.05])
-plt.ylim([0, 5])
-plt.xticks(fontsize=12)
-plt.grid(True)
-plt.tight_layout()
-plt.savefig('power_target.png', dpi=300)
 plt.show()
