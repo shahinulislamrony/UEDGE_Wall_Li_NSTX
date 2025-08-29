@@ -5,6 +5,7 @@ Updated on 2025-07-17
 """
 
 import os
+import glob
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -13,9 +14,13 @@ from matplotlib.cm import ScalarMappable
 
 
 # -------- PATH CONFIG --------
-DATA_PATH = r'/home/islam9/Desktop/UEDGE/NSTX_PoP_data/dt10ms'
+DATA_PATH = r'/global/cfs/cdirs/mp2/shahinul/Nuclear_Fusion/low_FX/PePi8.0MW'
 
-# -------- LOADING Li DATA --------
+import os
+import glob
+import pandas as pd
+import numpy as np
+
 def read_csv(filepath):
     try:
         return pd.read_csv(filepath).values
@@ -23,20 +28,27 @@ def read_csv(filepath):
         print(f"Error reading {filepath}: {e}")
         return None
 
-Li_data = {
-    'phi_Li': read_csv(os.path.join(DATA_PATH, 'Phi_Li.csv')),
-    'Li_all': read_csv(os.path.join(DATA_PATH, 'Li_all.csv'))
-}
+# look inside the Tsurf_Li folder
+files = sorted(glob.glob(os.path.join("Tsurf_Li", "T_surfit_*.csv")))
 
-if Li_data['phi_Li'] is None or Li_data['Li_all'] is None:
-    raise RuntimeError("Missing critical Li CSV files. Exiting.")
+Tsurf_max_values = []
 
-phi_Li = Li_data['phi_Li'].flatten()
-Li_all = Li_data['Li_all']
-Li_source_odiv = Li_all[-1, 0] + phi_Li
+for filename in files:
+    data = read_csv(filename)
+    if data is not None:
+        Tsurf_max_values.append(np.nanmax(data))
 
-print("? Li_source_odiv loaded:", Li_source_odiv.shape, "Example:", Li_source_odiv[:5])
+Tsurf_max_values = np.array(Tsurf_max_values)
 
+
+
+if len(Tsurf_max_values) == 0:
+    raise RuntimeError("No T_surfit_*.csv files found in Tsurf_Li/.")
+
+print("? Tsurf_Li max values loaded:", Tsurf_max_values.shape, 
+      "Example:", Tsurf_max_values[:5])
+
+Li_source_odiv = Tsurf_max_values
 
 def replace_with_linear_interpolation(arr):
     arr = pd.Series(arr).infer_objects()
@@ -75,10 +87,6 @@ def safe_weighted_sum(arr, sxnp, label):
     sxnp = np.array(sxnp)
     arr = np.squeeze(arr)
     sxnp = np.squeeze(sxnp)
-    # Check for scalars (0-d arrays)
-    if arr.ndim == 0 or sxnp.ndim == 0:
-        print(f"Warning: {label} or sxnp is scalar. Returning nan.")
-        return np.nan
     if arr.ndim > 1:
         print(f"Warning: {label} array has shape {arr.shape}, flattening.")
         arr = arr.flatten()
@@ -100,6 +108,7 @@ def safe_weighted_sum(arr, sxnp, label):
         print(f"Final shape mismatch for {label}: {arr.shape} vs {sxnp.shape}. Returning nan.")
         return np.nan
     return np.sum(arr * sxnp)
+
 
 def process_dataset(data_path, nx):
     max_value_tsurf, max_q, max_q_Li_list, C_Li_omp, total = [], [], [], [], []
@@ -203,7 +212,7 @@ def plot_data(ax, x, y, color, label=""):
 
 
 def process_and_plot_multiple(datasets, y, max_value_tsurf, total, output_file):
-    fig, axs = plt.subplots(len(datasets), 1, figsize=(5, 3.0), sharex=True)
+    fig, axs = plt.subplots(len(datasets), 1, figsize=(4.25, 3), sharex=True)
     if len(datasets) == 1:
         axs = [axs]
 
@@ -269,22 +278,20 @@ def process_and_plot_multiple(datasets, y, max_value_tsurf, total, output_file):
                 print(f"? Error loading {filename}: {e}")
                 continue
 
-        ax.set_ylabel(data_info['ylabel'], fontsize=16)
-        ax.tick_params(axis='both', which='major', labelsize=12)
-        ax.grid(True, which='both', linestyle='--', linewidth=0.7, alpha=0.7)
+        ax.set_ylabel(data_info['ylabel'], fontsize=14)
+        ax.grid(True)
         #ax.set_ylim(0, max_plot_value * 1.05 if max_plot_value > 0 else 1)
-        ax.set_yscale('symlog', linthresh=1e-2)  # Adjust linthresh as needed
+        ax.set_yscale('symlog', linthresh=1e0)  # Adjust linthresh as needed
         ax.set_ylabel(data_info['ylabel'], fontsize=14)
         ax.grid(True, which='both')
 
         cbar = plt.colorbar(sm, ax=ax, orientation='vertical', fraction=0.05, pad=0.04)
-        cbar.set_label('$\phi_{Li}$ (10$^{22}$ atom/s)', fontsize=14)
-        cbar.ax.tick_params(labelsize=11)
+        cbar.set_label('$\phi_{Li}$ (10$^{22}$ atom/s)', fontsize=10)
 
         #ax.text(0.95, 0.95, f"({chr(97 + i)})", transform=ax.transAxes,
          #       fontsize=14, va='top', ha='right')
 
-    axs[-1].set_xlabel(r"r$_{div}$ - r$_{sep}$ (m)", fontsize=16)
+    axs[-1].set_xlabel(r"r$_{div}$ - r$_{sep}$ (m)", fontsize=14)
     plt.tight_layout()
     plt.savefig(output_file, dpi=300)
     plt.show()
@@ -292,30 +299,30 @@ def process_and_plot_multiple(datasets, y, max_value_tsurf, total, output_file):
 
 # -------- MAIN --------
 if __name__ == "__main__":
-    nx = 500
+    nx = 113
     y = np.array([
-        -0.05544489, -0.0507309 , -0.04174753, -0.03358036, -0.02614719,
-        -0.01935555, -0.01316453, -0.00755603, -0.00245243,  0.00497426,
-         0.012563  ,  0.01795314,  0.02403169,  0.03088529,  0.03865124,
-         0.04744072,  0.05723254,  0.06818729,  0.0804908 ,  0.09413599,
-         0.10907809,  0.12501805,  0.14181528,  0.15955389,  0.17792796
-    ])
+        -0.02640231, -0.02372757, -0.01875399, -0.01441994, -0.01073658,
+       -0.00764067, -0.00501472, -0.00277724, -0.00087231,  0.00533494,
+        0.01609611,  0.02663718,  0.03709092,  0.0481553 ,  0.05976873,
+        0.07184217,  0.08440904,  0.09748994,  0.1110626 ,  0.12505532,
+        0.13942652,  0.15425184,  0.16937158,  0.18483239,  0.20088217
+           ])
     sxnp = np.array([
-        1.65294727e-08, 1.68072047e-02, 1.57913285e-02, 1.47307496e-02,
-        1.37802350e-02, 1.28710288e-02, 1.19247238e-02, 1.09516290e-02,
-        1.02117906e-02, 2.14465429e-02, 1.11099457e-02, 1.26587791e-02,
-        1.45917191e-02, 1.66915905e-02, 1.94826593e-02, 2.23582531e-02,
-        2.53806793e-02, 2.94667140e-02, 3.39163144e-02, 3.85707117e-02,
-        4.34572856e-02, 4.70735328e-02, 5.17684150e-02, 5.64336990e-02,
-        5.97825750e-02
-    ])
+       1.89751110e-08, 1.90652313e-02, 1.66399846e-02, 1.44392237e-02,
+       1.22260820e-02, 1.03981165e-02, 8.88177354e-03, 7.61129701e-03,
+       6.47890467e-03, 3.92735212e-02, 4.08973113e-02, 4.01229252e-02,
+       4.20196483e-02, 4.55164112e-02, 4.82451257e-02, 5.08852886e-02,
+       5.40979110e-02, 5.71332801e-02, 6.04026117e-02, 6.29738525e-02,
+       6.61572232e-02, 6.95500878e-02, 7.14773793e-02, 7.55555667e-02,
+       8.00399311e-02
+       ])
     evap = 2.44e-19
 
     max_value_tsurf, max_q, max_q_Li_list, C_Li_omp, total = process_dataset(DATA_PATH, nx)
     print("? max_value_tsurf sample:", max_value_tsurf[:5])
 
     cmap = plt.get_cmap('turbo')
-    norm = Normalize(vmin=0, vmax=np.max(Li_source_odiv) * 1.05)
+    norm = Normalize(vmin=0, vmax=np.max(total) * 1.05)
 
     datasets = [
 

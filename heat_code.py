@@ -159,9 +159,9 @@ def solve_heat_equation_2d(
 
         Gamma = evap_flux + fluxPhysSput + fluxAd
 
-        Gamma_incident_Li1 = bbb.fnix[com.nx, :, 2] / com.sxnp[com.nx, :]
-        Gamma_incident_Li2 = bbb.fnix[com.nx, :, 3] / com.sxnp[com.nx, :]
-        Gamma_incident_Li3 = bbb.fnix[com.nx, :, 4] / com.sxnp[com.nx, :]
+        Gamma_incident_Li1 = bbb.fnix[com.nx, :, com.nhsp] / com.sxnp[com.nx, :]
+        Gamma_incident_Li2 = bbb.fnix[com.nx, :, com.nhsp+1] / com.sxnp[com.nx, :]
+        Gamma_incident_Li3 = bbb.fnix[com.nx, :, com.nhsp+2] / com.sxnp[com.nx, :]
 
         Gamma_all = Gamma_incident_Li1 + Gamma_incident_Li2 + Gamma_incident_Li3
         Gamma_net = Gamma - Gamma_all
@@ -171,9 +171,8 @@ def solve_heat_equation_2d(
         M_li = 6.941e-3            # kg/mol
         L_f_kg = L_f_per_mol / M_li  # J/kg
 
-        latent_T_range = (T_new[:, 1] > 178) & (T_new[:, 1] < 182)
-        L_f = np.zeros_like(T_new[:, 1])
-        L_f[latent_T_range] = L_f_kg
+        latent_T_range = (T_new[:, 1] > 179.99) & (T_new[:, 1] < 180.01)
+        L_f = np.where(T_new[:, 1] == 180, L_f_kg, 0.0)
 
         area = Lx * DEPTH
 

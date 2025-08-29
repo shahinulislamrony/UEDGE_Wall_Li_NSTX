@@ -1,35 +1,4 @@
-import sys
-import math
-import numpy as np
-import matplotlib.pyplot as plt
-from uedge import *
-import uedge_mvu.plot as mp
-import uedge_mvu.utils as mu
-import uedge_mvu.analysis as mana
-import UEDGE_utils.analysis as ana
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-from runcase import *
 
-
-
-setGrid()
-setPhysics(impFrac=0,fluxLimit=True)
-setDChi(kye=1.0, kyi=1.0, difni=0.5,nonuniform = True)
-setBoundaryConditions(ncore=6.0e19, pcoree=2.5e6, pcorei=2.5e6, recycp=0.98)
-setimpmodel(impmodel=True)
-
-bbb.fphysyrb = 1.0
-bbb.cion=3
-bbb.oldseec=0
-bbb.restart=1
-
-hdf5_restore("./final.hdf5") # converged solution with Li atoms and ions for bbb.isteon=0
-
-
-bbb.ftol=1e20
-bbb.ftol=1e20;bbb.issfon=0; bbb.exmain()
 
 ####Save output as ASCII file
 
@@ -38,15 +7,28 @@ q_perp_div = ana.PsurfOuter()
 q_perp_div = (q_perp_div*np.cos(com.angfx[com.nx,:]))/com.sx[com.nx,:]
 
 q_para_odiv = ana.qsurfparOuter()
-
+bbb.pradpltwl()
+bbb.plateflux()
+bbb.engbal(bbb.pcoree+bbb.pcorei)
 rrf = ana.getrrf()
+q_rad = bbb.pwr_pltz[:, 1] + bbb.pwr_plth[:, 1]
+q_data = (bbb.sdrrb + bbb.sdtrb).reshape(-1)
+
 PionParallelKE = 0.5*bbb.mi[0]*bbb.up[:,:,0]**2*bbb.fnix[:,:,0]
-fthtx = bbb.feex+bbb.feix
+
+
 qheat = bbb.fetx[com.ixpt2,:] \
              +bbb.fnix[com.ixpt2,:,0]*bbb.ebind*bbb.ev \
              +PionParallelKE[com.ixpt2,:] 
 
 q_para_all = qheat/com.sx/rrf
+
+
+L = ana.para_conn_length(bbb,com)
+df=pd.DataFrame(L)     
+df.to_csv('conn.csv', index=False, header=False)
+
+
 
 df=pd.DataFrame(q_para_all)     
 df.to_csv('q_para.csv', index=False, header=False)
@@ -57,7 +39,7 @@ df.to_csv('q_para_odiv.csv', index=False, header=False)
 
 
 df=pd.DataFrame(q_perp_div)     
-df.to_csv('q_perp_div.csv', index=False, header=False)
+df.to_csv('q_data.csv', index=False, header=False)
 
 df=pd.DataFrame(bbb.te/bbb.ev)     
 df.to_csv('Te.csv', index=False, header=False)

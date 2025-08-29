@@ -15,6 +15,27 @@ from matplotlib.cm import ScalarMappable
 # -------- PATH CONFIG --------
 DATA_PATH = r'/global/cfs/cdirs/mp2/shahinul/Nuclear_Fusion/low_FX/PePi8.0MW'
 
+# -------- LOADING Li DATA --------
+def read_csv(filepath):
+    try:
+        return pd.read_csv(filepath).values
+    except Exception as e:
+        print(f"Error reading {filepath}: {e}")
+        return None
+
+Li_data = {
+    'phi_Li': read_csv(os.path.join(DATA_PATH, 'Phi_Li.csv')),
+    'Li_all': read_csv(os.path.join(DATA_PATH, 'Li_all.csv'))
+}
+
+if Li_data['phi_Li'] is None or Li_data['Li_all'] is None:
+    raise RuntimeError("Missing critical Li CSV files. Exiting.")
+
+phi_Li = Li_data['phi_Li'].flatten()
+Li_all = Li_data['Li_all']
+Li_source_odiv = Li_all[-1, 0] + phi_Li
+
+print("? Li_source_odiv loaded:", Li_source_odiv.shape, "Example:", Li_source_odiv[:5])
 
 
 def replace_with_linear_interpolation(arr):
@@ -179,7 +200,7 @@ def plot_data(ax, x, y, color, label=""):
 
 
 def process_and_plot_multiple(datasets, y, max_value_tsurf, total, output_file):
-    fig, axs = plt.subplots(len(datasets), 1, figsize=(4, 7), sharex=True)
+    fig, axs = plt.subplots(len(datasets), 1, figsize=(4.25, 3), sharex=True)
     if len(datasets) == 1:
         axs = [axs]
 
@@ -248,12 +269,15 @@ def process_and_plot_multiple(datasets, y, max_value_tsurf, total, output_file):
         ax.set_ylabel(data_info['ylabel'], fontsize=14)
         ax.grid(True)
         #ax.set_ylim(0, max_plot_value * 1.05 if max_plot_value > 0 else 1)
+        ax.set_yscale('symlog', linthresh=1e0)  # Adjust linthresh as needed
+        ax.set_ylabel(data_info['ylabel'], fontsize=14)
+        ax.grid(True, which='both')
 
         cbar = plt.colorbar(sm, ax=ax, orientation='vertical', fraction=0.05, pad=0.04)
         cbar.set_label('$\phi_{Li}$ (10$^{22}$ atom/s)', fontsize=10)
 
-        ax.text(0.95, 0.95, f"({chr(97 + i)})", transform=ax.transAxes,
-                fontsize=14, va='top', ha='right')
+        #ax.text(0.95, 0.95, f"({chr(97 + i)})", transform=ax.transAxes,
+         #       fontsize=14, va='top', ha='right')
 
     axs[-1].set_xlabel(r"r$_{div}$ - r$_{sep}$ (m)", fontsize=14)
     plt.tight_layout()
@@ -263,22 +287,22 @@ def process_and_plot_multiple(datasets, y, max_value_tsurf, total, output_file):
 
 # -------- MAIN --------
 if __name__ == "__main__":
-    nx = 112
+    nx = 500
     y = np.array([
-         -0.02640231, -0.02372757, -0.01875399, -0.01441994, -0.01073658,
-       -0.00764067, -0.00501472, -0.00277724, -0.00087231,  0.00533494,
-        0.01609611,  0.02663718,  0.03709092,  0.0481553 ,  0.05976873,
-        0.07184217,  0.08440904,  0.09748994,  0.1110626 ,  0.12505532,
-        0.13942652,  0.15425184,  0.16937158,  0.18483239,  0.20088217
+        -0.05544489, -0.0507309 , -0.04174753, -0.03358036, -0.02614719,
+        -0.01935555, -0.01316453, -0.00755603, -0.00245243,  0.00497426,
+         0.012563  ,  0.01795314,  0.02403169,  0.03088529,  0.03865124,
+         0.04744072,  0.05723254,  0.06818729,  0.0804908 ,  0.09413599,
+         0.10907809,  0.12501805,  0.14181528,  0.15955389,  0.17792796
     ])
     sxnp = np.array([
-     1.89751110e-08, 1.90652313e-02, 1.66399846e-02, 1.44392237e-02,
-       1.22260820e-02, 1.03981165e-02, 8.88177354e-03, 7.61129701e-03,
-       6.47890467e-03, 3.92735212e-02, 4.08973113e-02, 4.01229252e-02,
-       4.20196483e-02, 4.55164112e-02, 4.82451257e-02, 5.08852886e-02,
-       5.40979110e-02, 5.71332801e-02, 6.04026117e-02, 6.29738525e-02,
-       6.61572232e-02, 6.95500878e-02, 7.14773793e-02, 7.55555667e-02,
-       8.00399311e-02
+        1.65294727e-08, 1.68072047e-02, 1.57913285e-02, 1.47307496e-02,
+        1.37802350e-02, 1.28710288e-02, 1.19247238e-02, 1.09516290e-02,
+        1.02117906e-02, 2.14465429e-02, 1.11099457e-02, 1.26587791e-02,
+        1.45917191e-02, 1.66915905e-02, 1.94826593e-02, 2.23582531e-02,
+        2.53806793e-02, 2.94667140e-02, 3.39163144e-02, 3.85707117e-02,
+        4.34572856e-02, 4.70735328e-02, 5.17684150e-02, 5.64336990e-02,
+        5.97825750e-02
     ])
     evap = 2.44e-19
 
@@ -286,30 +310,16 @@ if __name__ == "__main__":
     print("? max_value_tsurf sample:", max_value_tsurf[:5])
 
     cmap = plt.get_cmap('turbo')
-    norm = Normalize(vmin=0, vmax=np.max(total) * 1.05)
+    norm = Normalize(vmin=0, vmax=np.max(Li_source_odiv) * 1.05)
 
     datasets = [
-        dict(directory=os.path.join(DATA_PATH, 'q_perp'),
-             file_prefix='q_perpit',
+
+        dict(directory=os.path.join(DATA_PATH, 'Gamma_net'),
+             file_prefix='Gamma_Li_surface',
              is_2D=False, is_sxnp=False, is_evap=False,
              sxnp=sxnp, evap=evap, cmap=cmap, norm=norm,
-             unit_scale=1e-6,
-             ylabel='$q_{\\perp}^{odiv}$ (MW/m$^2$)'),
+              unit_scale=1e-22,
+             ylabel='$\Gamma_{Li}^{net}$ (10$^{22}$ m$^{-2}$s$^{-1}$)')
+    ]
 
-        dict(directory=os.path.join(DATA_PATH, 'T_e'),
-             file_prefix='T_e',
-             is_2D=True, is_sxnp=False, is_evap=False,
-             sxnp=sxnp, evap=evap, cmap=cmap, norm=norm,
-             unit_scale=1.0,
-             ylabel='$T_e^{odiv}$ (eV)'),
-
-        dict(directory=os.path.join(DATA_PATH, 'n_e'),
-             file_prefix='n_e',
-             is_2D=True, is_sxnp=False, is_evap=False, use_npy=True,
-             sxnp=sxnp, evap=evap, cmap=cmap, norm=norm,
-             unit_scale=1e-20,
-             ylabel='$n_e^{odiv}$ (10$^{20}$ m$^{-3}$)')
-
-       ]
-
-    process_and_plot_multiple(datasets, y, max_value_tsurf, total, "combined_plot.png")
+    process_and_plot_multiple(datasets, y, max_value_tsurf, total, "Gamma_net.png")

@@ -18,24 +18,28 @@ from runcase import *
 import traceback
 import heat_code
 
+setGrid()
+setPhysics(impFrac=0,fluxLimit=True)
+setDChi(kye=0.36, kyi=0.36, difni=0.5,nonuniform = True, kye_sol=0.56)
+setBoundaryConditions(ncore=6.2e19, pcoree=4.0e6, pcorei=4.0e6, recycp=0.95, owall_puff=0)
+setimpmodel(impmodel=True)
 
-## Set time step for the simulation 
+
+bbb.cion=3
+bbb.oldseec=0
+bbb.restart=1
+bbb.nusp_imp = 3
+bbb.icntnunk=0
+bbb.kye=0.36
+bbb.kyi = 0.36
+setDChi(kye=0.36, kyi=0.36, difni=0.5,nonuniform = True, kye_sol=0.56)
+
+
+
 t_run = 5 # s
 dt_each = 10e-3
 
 
-# ---- UEDGE Setup ----
-setGrid()
-setPhysics(impFrac=0, fluxLimit=True)
-setDChi(kye=1.0, kyi=1.0, difni=0.5, nonuniform=True)
-setBoundaryConditions(ncore=6.2e19, pcoree=2.0e6, pcorei=2.0e6, recycp=0.98)
-setimpmodel(impmodel=True)
-
-bbb.cion = 3
-bbb.oldseec = 0
-bbb.restart = 1
-bbb.nusp_imp = 3
-bbb.icntnunk = 0
 
 
 try:
@@ -319,7 +323,8 @@ while i <= n:
     bbb.isbcwdt = 1
     bbb.exmain()
 
-    ut.uestep(dt_each, reset=True)
+    ut.uestep(dt_each, depth_max=20, nrefine=3, reset=True)
+  
 
 
     print("******done, now save data*****")
@@ -344,9 +349,9 @@ while i <= n:
         ne_max_odiv.append(ne_max)
         zeff_omp = bbb.zeff[bbb.ixmp, com.iysptrx+1]
         zeff_OMP_sep.append(zeff_omp)
-        n_Li = (bbb.ni[bbb.ixmp, com.iysptrx+1, 2] +
-                bbb.ni[bbb.ixmp, com.iysptrx+1, 3] +
-                bbb.ni[bbb.ixmp, com.iysptrx+1, 4])
+        n_Li = (bbb.ni[bbb.ixmp, com.iysptrx+1, com.nhsp] +
+                bbb.ni[bbb.ixmp, com.iysptrx+1, com.nhsp+1] +
+                bbb.ni[bbb.ixmp, com.iysptrx+1, com.nhsp+2])
         C_Li_OMP = n_Li / bbb.ne[bbb.ixmp, com.iysptrx+1]
         C_Li_omp_sep.append(C_Li_OMP)
         ni_omp = bbb.ni[bbb.ixmp, com.iysptrx+1, 0]
@@ -358,26 +363,26 @@ while i <= n:
         save_csv(bbb.ni[:, :, 2], "n_Li1", "n_Li1", i)
         save_csv(bbb.ng[:, :, 1], "n_atom", "n_0", i)
         save_csv(bbb.fnix[com.nx, :, 0], "Phi_D1_odiv", "Phi_D1", i)
-        save_csv(bbb.fnix[com.nx, :, 2], "Phi_Li1_odiv", "Phi_Li1", i)
-        save_csv(bbb.fnix[com.nx, :, 3], "Phi_Li2_odiv", "Phi_Li2", i)
-        save_csv(bbb.fnix[com.nx, :, 4], "Phi_Li3_odiv", "Phi_Li3", i)
-        save_csv(bbb.fniy[:, com.ny, 4], "Phi_Li3_wall", "Phi_Li3", i)
+        save_csv(bbb.fnix[com.nx, :, com.nhsp], "Phi_Li1_odiv", "Phi_Li1", i)
+        save_csv(bbb.fnix[com.nx, :, com.nhsp+1], "Phi_Li2_odiv", "Phi_Li2", i)
+        save_csv(bbb.fnix[com.nx, :, com.nhsp+2], "Phi_Li3_odiv", "Phi_Li3", i)
+        save_csv(bbb.fniy[:, com.ny, com.nhsp+2], "Phi_Li3_wall", "Phi_Li3", i)
         save_csv(bbb.te / bbb.ev, "T_e", "T_e", i)
-        save_csv(bbb.ni[:, :, 3], "n_Li2", "n_Li2", i)
-        save_csv(bbb.ni[:, :, 4], "n_Li3", "n_Li3", i)
+        save_csv(bbb.ni[:, :, com.nhsp+1], "n_Li2", "n_Li2", i)
+        save_csv(bbb.ni[:, :, com.nhsp+2], "n_Li3", "n_Li3", i)
         ensure_dir("n_e")
         np.save(os.path.join("n_e", f"n_e_{int(i)}"), bbb.ne)
-        n_Li_all_sep = (bbb.ni[:, com.iysptrx, 2] +
-                        bbb.ni[:, com.iysptrx, 3] +
-                        bbb.ni[:, com.iysptrx, 4])
+        n_Li_all_sep = (bbb.ni[:, com.iysptrx, com.nhsp] +
+                        bbb.ni[:, com.iysptrx, com.nhsp+1] +
+                        bbb.ni[:, com.iysptrx, com.nhsp+2])
         ne_all_sep = bbb.ne[:, com.iysptrx]
         C_Li_all_sep = n_Li_all_sep / ne_all_sep
         save_csv(C_Li_all_sep, "C_Li", "C_Li_sep_all", i)
         C_Li_all_sep_avg.append(np.average(C_Li_all_sep))
 
-        n_Li_rad = (bbb.ni[bbb.ixmp, :, 2] +
-                    bbb.ni[bbb.ixmp, :, 3] +
-                    bbb.ni[bbb.ixmp, :, 4])
+        n_Li_rad = (bbb.ni[bbb.ixmp, :, com.nhsp] +
+                    bbb.ni[bbb.ixmp, :, com.nhsp+1] +
+                    bbb.ni[bbb.ixmp, :, com.nhsp+2])
         C_Li_OMP_rad = n_Li / bbb.ne[bbb.ixmp, :]
         zeff_omp_rad = bbb.zeff[bbb.ixmp, :]
         save_csv(C_Li_OMP_rad, "C_Li_omp", "CLi_prof", i)
@@ -388,13 +393,13 @@ while i <= n:
         phi_Li_source_pfr.append(np.sum(bbb.sputflxpf))
         phi_Li_source_wall.append(np.sum(bbb.sputflxw))
         Li_rad.append(np.sum(bbb.prad[:, :] * com.vol))
-        phi_Li_odiv.append(np.sum(bbb.fnix[com.nx, :, 2:5]))
-        phi_Li_idiv.append(np.sum(np.abs(bbb.fnix[0, :, 2:5])))
-        phi_Li_wall.append(np.sum(np.abs(bbb.fniy[:, com.ny, 2:5])))
-        pump_Li_odiv.append(np.sum((1 - bbb.recycp[1]) * bbb.fnix[com.nx, :, 2:5]))
-        pump_Li_idiv.append(np.sum((1 - bbb.recycp[1]) * bbb.fnix[0, :, 2:5]))
-        pump_Li_wall.append(np.sum((1 - bbb.recycw[1]) * bbb.fniy[:, com.ny, 2:5]))
-        Li_ionization.append(np.sum(np.abs(bbb.psor[:, :, 2:5])))
+        phi_Li_odiv.append(np.sum(bbb.fnix[com.nx, :, com.nhsp:com.nhsp+3]))
+        phi_Li_idiv.append(np.sum(np.abs(bbb.fnix[0, :, com.nhsp:com.nhsp+3])))
+        phi_Li_wall.append(np.sum(np.abs(bbb.fniy[:, com.ny, com.nhsp:com.nhsp+3])))
+        pump_Li_odiv.append(np.sum((1 - bbb.recycp[1]) * bbb.fnix[com.nx, :, com.nhsp:com.nhsp+3]))
+        pump_Li_idiv.append(np.sum((1 - bbb.recycp[1]) * bbb.fnix[0, :, com.nhsp:com.nhsp+3]))
+        pump_Li_wall.append(np.sum((1 - bbb.recycw[1]) * bbb.fniy[:, com.ny, com.nhsp:com.nhsp+3]))
+        Li_ionization.append(np.sum(np.abs(bbb.psor[:, :, com.nhsp:com.nhsp+3])))
 
         # --- Save surface heatflux components and plots for both targets ---
         for target in ['outer', 'inner']:

@@ -99,7 +99,7 @@ def setPhysics(impFrac=0.0, b0=1.0, fluxLimit=False):
     bbb.ups=0
     
     
-def setBoundaryConditions(ncore=6e19, pcoree=2.5e6, pcorei=2.5e6, recycp=0.98, recycw=1.0,owall_puff=0.0, pfr_puff=0.0):
+def setBoundaryConditions(ncore=6e19, pcoree=2.5e6, pcorei=2.5e6, recycp=0.98, recycw=1.0,owall_puff=0.0, pfr_puff=0.0, dis = 1.75):
 
     bbb.isnicore[0] = 1     #=3 gives uniform density and I=curcore
     bbb.ncore[0] = ncore     #hydrogen ion density on core
@@ -178,8 +178,8 @@ def setBoundaryConditions(ncore=6e19, pcoree=2.5e6, pcorei=2.5e6, recycp=0.98, r
     
    #-outer wall
     bbb.igaso[1]= owall_puff  #-total puff strength [A]
-    bbb.xgaso[1] = 0.01  #-source center poloidal location [m]
-    bbb.wgaso[1] = 0.03 #-source width [m]
+    bbb.xgaso[1] = dis  #-source center poloidal location [m]
+    bbb.wgaso[1] = 0.1 #-source width [m]
     bbb.issorlb[1] = 0  #-measure poloidal distance from inner plate
     bbb.igaso = 0.0
 #-inner wall
@@ -267,14 +267,14 @@ def setimpmodel(impmodel=False, sput_factor=1.0):
         bbb.isybdryog=1
 
 
-        bbb.nwsor = 2
+        #bbb.nwsor = 2
         bbb.igspsoro[bbb.nwsor-1] = 2
         bbb.igspsori[bbb.nwsor-1] = 2
         bbb.albdso[bbb.nwsor-1] = 0.99
         bbb.albdsi[bbb.nwsor-1] = 0.99
 
 
-def setDChi(kye=0.25, kyi=0.25, difni=0.25, nonuniform=False):
+def setDChi(kye=0.25, kyi=0.25, difni=0.25, nonuniform=False, kye_sol = 0.15):
     
     if (nonuniform == False):
         print("Setting uniform transport coefficients")
@@ -307,43 +307,37 @@ def setDChi(kye=0.25, kyi=0.25, difni=0.25, nonuniform=False):
 
 #Dn 
         profparam=5e-3
+        Dn_core = 0.33
+        Dn_SOL_max = 0.33
         rprof = np.zeros(com.ny+2)
-        rprof[com.iysptrx:com.ny+2] = 0.33 #0.50*np.exp((com.yyc[com.iysptrx:com.ny+2]-com.yyc[com.iysptrx])/profparam) 
-        rprof[0:com.iysptrx] = 0.33
-        #rprof[com.iysptrx-1:com.iysptrx+2] = 0.3
+        rprof[0:com.iysptrx] = Dn_core
+        L_sol = 4e-3  # SOL decay length
+        rprof[com.iysptrx : com.ny + 2] =0.33# Dn_SOL_max * np.exp(-(com.yyc[com.iysptrx : com.ny + 2] - com.yyc[com.iysptrx]) / L_sol)
+        rprof[com.iysptrx - 1 : com.iysptrx + 2] = Dn_SOL_max
         
-#Electron energy, chi_e
-        profparam2=4e-3
-        rprof2 = np.zeros(com.ny+2)
-        rprof2[com.iysptrx:com.ny+2] = 0.5*np.exp((com.yyc[com.iysptrx:com.ny+2]-com.yyc[com.iysptrx])/profparam2) 
-        rprof2[0:com.iysptrx] = 1.5
-        rprof2[com.iysptrx-1:com.iysptrx+2] = 0.5
         
 #Ion energy, chi_i
-        profparam3=4.7e-3
+        profparam3=5.0e-3
         rprof3 = np.zeros(com.ny+2)
-        rprof3[com.iysptrx:com.ny+2] = 0.5*np.exp((com.yyc[com.iysptrx:com.ny+2]-com.yyc[com.iysptrx])/profparam3) 
+        rprof3[com.iysptrx+2:com.ny+2] = kye_sol * np.exp((com.yyc[com.iysptrx+2:com.ny+2] - com.yyc[com.iysptrx]) / profparam3) 
         rprof3[0:com.iysptrx] = 1.5
-        rprof3[com.iysptrx-1:com.iysptrx+2] = 0.5
+        rprof3[com.iysptrx-1:com.iysptrx+2] = kye_sol 
 
 #-clip it to a constant value
 #real 
 
         dmax=0.5
         dmax2=6
-        dmax3=3
+        dmax3=2.5
         for iii in range(0,com.ny+2):
             rprof[iii]=min(rprof[iii],dmax)
-            rprof2[iii]=min(rprof2[iii],dmax2)
             rprof3[iii]=min(rprof3[iii],dmax3)
 
         for iii in range(0,com.nx+2):
             bbb.dif_use[iii,0:com.ny+2,0]=rprof # base 0,   (0:nx+1,0:ny+1,1:nisp)
-           # bbb.dif_use[iii,0:com.ny+2,1]=rprof
-            #bbb.dif_use[iii,0:com.ny+2,2]=rprof
-          #  bbb.dif_use[iii,0:com.ny+2,3]=rprof
+      
             
-            bbb.kye_use[iii,0:com.ny+2]= rprof3# use same for e and i rprof2
-            bbb.kyi_use[iii,0:com.ny+2]=rprof3
+            bbb.kye_use[iii,0:com.ny+2]= rprof3 # use same for e and i rprof2
+            bbb.kyi_use[iii,0:com.ny+2]= rprof3
 
       
