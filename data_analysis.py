@@ -43,7 +43,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-dt = 10e-3 
+dt = 10e-3  
 
 current_dir = os.getcwd()
 hdf5_dir = os.path.join(current_dir, "run_last_iterations")
@@ -432,12 +432,12 @@ plt.show()
 fig, axs = plt.subplots(2, 1, figsize=(4, 5), sharex=True)
 
 # First subplot: Power channels (log scale)
-axs[0].plot(df["time [s]"], df["P_SOL [MW]"], marker='h', label="SOL")
-axs[0].plot(df["time [s]"], df["P_outer [MW]"], marker='o', label="Odiv")
-axs[0].plot(df["time [s]"], df["P_inner [MW]"], marker='s', label="Idiv")
-axs[0].plot(df["time [s]"], df["P_wall [MW]"]+df["P_PFR [MW]"], marker='^', label="O-wall")
-axs[0].plot(df["time [s]"], df["P_rad [MW]"], marker='d', label="P-rad")
-axs[0].plot(df["time [s]"], df["P_total [MW]"], marker='x', label="Total", color='k', linewidth=1.5)
+axs[0].plot(df["time [s]"], df["P_SOL [MW]"],  label="SOL")
+axs[0].plot(df["time [s]"], df["P_outer [MW]"],  label="Odiv")
+axs[0].plot(df["time [s]"], df["P_inner [MW]"],  label="Idiv")
+axs[0].plot(df["time [s]"], df["P_wall [MW]"]+df["P_PFR [MW]"], label="O-wall")
+axs[0].plot(df["time [s]"], df["P_rad [MW]"],  label="P-rad")
+axs[0].plot(df["time [s]"], df["P_total [MW]"], label="Total", linewidth=1.5)
 
 ymin1 = df[["P_SOL [MW]", "P_outer [MW]", "P_inner [MW]", "P_wall [MW]", "P_rad [MW]", "P_total [MW]"]].replace(0, np.nan).min().min()
 ymax1 = df[["P_SOL [MW]", "P_outer [MW]", "P_inner [MW]", "P_wall [MW]", "P_rad [MW]", "P_total [MW]"]].max().max()
@@ -452,10 +452,10 @@ axs[0].tick_params(axis='both', labelsize=12)
 axs[0].legend(loc='lower center', bbox_to_anchor=(0.5, 1.02), ncol=3, fontsize=10, frameon=False)
 
 # Second subplot: Impurity power channels (log scale)
-axs[1].plot(df["time [s]"], df["imp_target_Odiv [MW]"], marker='o', label="Odiv")
-axs[1].plot(df["time [s]"], df["imp_target_Idiv [MW]"], marker='s', label="Idiv")
-axs[1].plot(df["time [s]"], df["imp_wall [MW]"], marker='^', label="O-wall")
-axs[1].plot(df["time [s]"], df["imp_PFR [MW]"], marker='d', label="PFR")
+axs[1].plot(df["time [s]"], df["imp_target_Odiv [MW]"], label="Odiv")
+axs[1].plot(df["time [s]"], df["imp_target_Idiv [MW]"],  label="Idiv")
+axs[1].plot(df["time [s]"], df["imp_wall [MW]"], label="O-wall")
+axs[1].plot(df["time [s]"], df["imp_PFR [MW]"],  label="PFR")
 
 ymin2 = df[["imp_target_Odiv [MW]", "imp_target_Idiv [MW]", "imp_wall [MW]", "imp_PFR [MW]"]].replace(0, np.nan).min().min()
 ymax2 = df[["imp_target_Odiv [MW]", "imp_target_Idiv [MW]", "imp_wall [MW]", "imp_PFR [MW]"]].max().max()
@@ -475,7 +475,62 @@ plt.tight_layout()
 plt.savefig('combined_Lithium_rad_log.png', dpi=300, bbox_inches='tight')
 plt.show()
 
+import matplotlib.pyplot as plt
+import numpy as np
 
+# Assign a unique color to each variable
+color_sol = 'tab:orange'
+color_odiv = 'tab:blue'
+color_idiv = 'tab:red'
+color_owall = 'tab:green'
+color_prad = 'tab:cyan'
+color_total = 'tab:pink'
+color_pfr = 'tab:purple'
+
+color_imp_odiv =  'tab:blue'
+color_imp_idiv = 'tab:red'
+color_imp_owall = 'tab:green'
+color_imp_pfr = 'tab:teal'
+
+fig, axs = plt.subplots(2, 1, figsize=(5, 6), sharex=True)
+
+# First subplot: Power channels (log scale)
+axs[0].plot(df["time [s]"], df["P_SOL [MW]"], label="SOL", color=color_sol, linewidth=3)
+axs[0].plot(df["time [s]"], df["P_outer [MW]"], label="Odiv", color=color_odiv, linewidth=3)
+axs[0].plot(df["time [s]"], df["P_inner [MW]"], label="Idiv", color=color_idiv, linewidth=3)
+axs[0].plot(df["time [s]"], df["P_wall [MW]"] + df["P_PFR [MW]"], label="O-wall", color=color_owall, linewidth=3)
+axs[0].plot(df["time [s]"], df["P_rad [MW]"], label="P-rad", color=color_prad, linewidth=3)
+axs[0].plot(df["time [s]"], df["P_total [MW]"], label="Total", color=color_total, linewidth=3)
+axs[0].plot(df["time [s]"], df["P_PFR [MW]"], label="PFR", color=color_pfr, linewidth=3)
+
+axs[0].set_ylim([1e-1, 4])
+axs[0].set_xlim([0, np.max(df["time [s]"]) * 1.05])
+axs[0].set_ylabel("Power [MW]", fontsize=16)
+axs[0].set_yscale('log')
+axs[0].set_xlim([0, 5])
+axs[0].grid(True, which='both')
+axs[0].tick_params(axis='both', labelsize=12)
+axs[0].legend(loc='lower center', bbox_to_anchor=(0.5, 1.02), ncol=4, fontsize=10, frameon=False)
+
+# Second subplot: Impurity power channels (log scale)
+axs[1].plot(df["time [s]"], df["imp_target_Odiv [MW]"], label="Odiv", color=color_imp_odiv, linewidth=3)
+axs[1].plot(df["time [s]"], df["imp_target_Idiv [MW]"], label="Idiv", color=color_imp_idiv, linewidth=3)
+axs[1].plot(df["time [s]"], df["imp_wall [MW]"], label="O-wall", color=color_imp_owall, linewidth=3)
+axs[1].plot(df["time [s]"], df["imp_PFR [MW]"], label="PFR", color=color_imp_pfr, linewidth=3)
+
+axs[1].set_ylim([1e-3, 5e-1])
+axs[1].set_xlabel("t$_{simulation}$ (s)", fontsize=16)
+axs[1].set_ylabel("Li rad flux [MW]", fontsize=16)
+axs[1].set_xlim([0, np.max(df["time [s]"]) * 1.05])
+axs[1].set_yscale('log')
+axs[1].set_xlim([0, 5])
+axs[1].grid(True, which='both')
+axs[1].tick_params(axis='both', labelsize=12)
+axs[1].legend(loc='lower right', fontsize=10, ncol=2)
+
+plt.tight_layout()
+plt.savefig('combined_Lithium_rad_log.png', dpi=300, bbox_inches='tight')
+plt.show()
 
 fig, axs = plt.subplots(2, 1, sharex=True, figsize=(5, 5))
 axs[0].plot(df["time [s]"], df["Li_source_odiv [1e21/s]"], label="Odiv", linewidth= '2')
@@ -508,4 +563,156 @@ axs[1].text(0.02, 0.95, "(b)", transform=axs[1].transAxes, fontsize=16, va='top'
 
 plt.tight_layout()
 plt.savefig('Li_flux_x.png', dpi=600, bbox_inches='tight')
+plt.show()
+
+
+
+# Assign colors
+color_odiv = 'tab:blue'
+color_idiv = 'tab:red'
+color_wall = 'tab:green'
+
+fig, ax = plt.subplots(figsize=(5, 4))
+
+# Plot incident (source) fluxes
+line_inc_odiv, = ax.plot(df["time [s]"], df["Li_source_odiv [1e21/s]"], label="Odiv", color=color_odiv, linewidth=2)
+line_inc_idiv, = ax.plot(df["time [s]"], df["Li_source_idiv [1e21/s]"], label="Idiv", color=color_idiv, linewidth=2)
+
+# Plot deposit (strike) fluxes
+line_dep_odiv, = ax.plot(df["time [s]"], df["Li_ion_strike_odiv [1e21/s]"], label="Odiv", color=color_odiv, linewidth=3, linestyle='--')
+line_dep_idiv, = ax.plot(df["time [s]"], df["Li_ion_strike_idiv [1e21/s]"], label="Idiv", color=color_idiv, linewidth=3, linestyle='--')
+line_dep_wall, = ax.plot(df["time [s]"], df["Li_ion_strike_wall [1e21/s]"], label="Wall", color=color_wall, linewidth=3, linestyle='--')
+
+ax.set_xlabel(r't$_{simulation}$ (s)', fontsize=16)
+ax.set_ylabel(r'Li flux (10$^{21}$ /s)', fontsize=16)
+ax.set_yscale('log')
+ax.set_ylim([1e-2, 100])
+ax.set_xlim([0, 5])
+ax.tick_params(axis='both', labelsize=14)
+ax.minorticks_on()
+ax.grid(True, which='major', linestyle='-', linewidth=1.0, alpha=0.8)
+ax.grid(True, which='minor', linestyle='--', linewidth=0.5, alpha=0.3)
+
+# Create separate legend handles
+incident_handles = [line_inc_odiv, line_inc_idiv]
+deposit_handles = [line_dep_odiv, line_dep_idiv, line_dep_wall]
+
+# Place legends outside the plot, at the top
+legend1 = ax.legend(incident_handles, ["Odiv", "Idiv"], 
+                    title="Sourcing", fontsize=12, title_fontsize=12, 
+                    loc='lower left', bbox_to_anchor=(0.05, 1.02), frameon=True)
+legend2 = ax.legend(deposit_handles, ["Odiv", "Idiv", "Wall"], 
+                    title="Deposit", fontsize=12, title_fontsize=12, 
+                    loc='lower right', bbox_to_anchor=(0.95, 1.02), frameon=True, ncol=2)
+
+ax.add_artist(legend1)  # Add the first legend manually
+
+plt.tight_layout()
+plt.savefig('Li_flux_x_single_top_outside.png', dpi=600, bbox_inches='tight')
+plt.show()
+
+
+fig, axs = plt.subplots(2, 1, figsize=(5, 5), sharex=True)
+
+# --- Top: Power channels ---
+#axs[0].plot(df["time [s]"], df["P_SOL [MW]"], marker='h', label="SOL")
+axs[0].plot(df["time [s]"], df["P_outer [MW]"], marker='o', label="Odiv")
+axs[0].plot(df["time [s]"], df["P_inner [MW]"], marker='s', label="Idiv")
+axs[0].plot(df["time [s]"], df["P_wall [MW]"], marker='^', label="O-wall")
+axs[0].plot(df["time [s]"], df["P_rad [MW]"], marker='d', label="P-rad")
+#axs[0].plot(df["time [s]"], df["P_total [MW]"], marker='x', label="Total", color='k', linewidth=1.5)
+
+ymax1 = 6 #df["P_outer [MW]", "P_inner [MW]", "P_wall [MW]", "P_rad [MW]"].max().max()
+axs[0].set_ylim([0, ymax1*1.05])
+axs[0].set_ylabel("Power [MW]", fontsize=14)
+axs[0].legend(loc='best', ncol=2, fontsize=10)
+axs[0].grid(True)
+axs[0].tick_params(axis='both', labelsize=12)
+
+# --- Bottom: Particle balance ---
+axs[1].plot(df["time [s]"], df["Gamma_wall [1e22/s]"], marker='^', label="Wall")
+axs[1].plot(df["time [s]"], df["Gamma_ODiv [1e22/s]"], marker='o', label="Odiv")
+axs[1].plot(df["time [s]"], df["Gamma_IDiv [1e22/s]"], marker='s', label="Idiv")
+ymax2 = df[["Gamma_wall [1e22/s]", "Gamma_ODiv [1e22/s]", "Gamma_IDiv [1e22/s]"]].max().max()
+axs[1].set_ylim([0, ymax2*1.05])
+axs[1].set_xlabel("t$_{simulation}$ (s)", fontsize=14)
+axs[1].set_ylabel("Particle flux [1e22/s]", fontsize=14)
+axs[1].legend(loc='best', ncol=1, fontsize=10)
+axs[1].grid(True)
+axs[1].tick_params(axis='both', labelsize=12)
+axs[1].set_xlim([0, np.max(df["time [s]"])*1.05])
+
+plt.tight_layout()
+plt.savefig('power_particle_balance.png', dpi=300)
+plt.show()
+
+
+# --- Lithium ionization and recombination plot ---
+plt.figure(figsize=(5,3))
+plt.plot(df["time [s]"], df["Ionization [1e22/s]"], marker='o', label="Ionization")
+plt.plot(df["time [s]"], df["Recombination [1e22/s]"], marker='s', label="Recombination")
+ymax4 = df[["Ionization [1e22/s]", "Recombination [1e22/s]"]].max().max()
+plt.xlabel("t$_{simulation}$ (s)")
+plt.ylabel("Li Ion/Rec [1e22/s]")
+plt.legend()
+plt.grid(True)
+plt.ylim([0, ymax4*1.05])
+plt.xlim([0, np.max(df["time [s]"])*1.05])
+plt.tight_layout()
+plt.savefig('li_ionization_recombination.png', dpi=300)
+plt.show()
+
+# --- Particle balance plot ---
+plt.figure(figsize=(5,3))
+plt.plot(df["time [s]"], df["Gamma_wall [1e22/s]"], marker='^', label="Wall")
+plt.plot(df["time [s]"], df["Gamma_ODiv [1e22/s]"], marker='o', label="Odiv")
+plt.plot(df["time [s]"], df["Gamma_IDiv [1e22/s]"], marker='s', label="Idiv")
+ymax3 = df[["Gamma_wall [1e22/s]", "Gamma_ODiv [1e22/s]", "Gamma_IDiv [1e22/s]"]].max().max()
+plt.xlabel("t$_{simulation}$ (s)")
+plt.ylabel("Particle flux [1e22/s]")
+plt.legend()
+plt.grid(True)
+plt.ylim([0, ymax3*1.05])
+plt.xlim([0, np.max(df["time [s]"])*1.05])
+plt.tight_layout()
+plt.savefig('particle_balance.png', dpi=300)
+plt.show()
+
+
+fig, axs = plt.subplots(2, 1, figsize=(4, 5), sharex=True)
+
+# First subplot: Power channels
+axs[0].plot(df["time [s]"], df["P_SOL [MW]"], marker='h', label="SOL")
+axs[0].plot(df["time [s]"], df["P_outer [MW]"], marker='o', label="Odiv")
+axs[0].plot(df["time [s]"], df["P_inner [MW]"], marker='s', label="Idiv")
+axs[0].plot(df["time [s]"], df["P_wall [MW]"]+df["P_PFR [MW]"], marker='^', label="O-wall")
+axs[0].plot(df["time [s]"], df["P_rad [MW]"], marker='d', label="P-rad")
+# If you have P_total [MW], uncomment below:
+# axs[0].plot(df["time [s]"], df["P_total [MW]"], marker='x', label="Total", color='k', linewidth=1.5)
+
+ymax1 = df[["P_SOL [MW]", "P_outer [MW]", "P_inner [MW]", "P_wall [MW]", "P_rad [MW]"]].max().max()
+axs[0].set_ylim([0, ymax1*1.05])
+axs[0].set_xlim([0, np.max(df["time [s]"])*1.05])
+axs[0].set_ylabel("Power [MW]", fontsize=16)
+axs[0].legend(loc='best', ncol=2, fontsize=10)
+axs[0].grid(True)
+axs[0].tick_params(axis='both', labelsize=12)
+
+# Second subplot: Impurity power channels
+axs[1].plot(df["time [s]"], df["imp_target_Odiv [MW]"], marker='o', label="Odiv")
+axs[1].plot(df["time [s]"], df["imp_target_Idiv [MW]"], marker='s', label="Idiv")
+axs[1].plot(df["time [s]"], df["imp_wall [MW]"], marker='^', label="O-wall")
+axs[1].plot(df["time [s]"], df["imp_PFR [MW]"], marker='d', label="PFR")
+
+ymax2 = df[["imp_target_Odiv [MW]", "imp_target_Idiv [MW]", "imp_wall [MW]", "imp_PFR [MW]"]].max().max()
+axs[1].set_ylim([0, ymax2*1.05])
+axs[1].set_xlabel("t$_{simulation}$ (s)", fontsize=16)
+axs[1].set_ylabel("Li rad flux [MW]", fontsize=16)
+axs[1].set_xlim([0, np.max(df["time [s]"])*1.05])
+axs[1].legend(loc='best', ncol=2, fontsize=10)
+axs[1].grid(True)
+axs[1].tick_params(axis='both', labelsize=12)
+
+plt.tight_layout()
+plt.savefig('combined_Lithium_rad.png', dpi=300)
 plt.show()
