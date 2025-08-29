@@ -6,20 +6,20 @@ from cycler import cycler
 from matplotlib.collections import LineCollection
 
 
-sxnp = np.array([1.65294727e-08, 1.68072047e-02, 1.57913285e-02, 1.47307496e-02,
-       1.37802350e-02, 1.28710288e-02, 1.19247238e-02, 1.09516290e-02,
-       1.02117906e-02, 2.14465429e-02, 1.11099457e-02, 1.26587791e-02,
-       1.45917191e-02, 1.66915905e-02, 1.94826593e-02, 2.23582531e-02,
-       2.53806793e-02, 2.94667140e-02, 3.39163144e-02, 3.85707117e-02,
-       4.34572856e-02, 4.70735328e-02, 5.17684150e-02, 5.64336990e-02,
-       5.97825750e-02, 6.08629236e-08])
+sxnp = np.array([3.35404901e-08, 3.39626464e-02, 3.19107170e-02, 2.95808764e-02,
+       2.68852014e-02, 2.39997574e-02, 2.11190302e-02, 1.83978410e-02,
+       1.57142358e-02, 9.29424623e-02, 9.04593404e-02, 8.32016795e-02,
+       7.43905569e-02, 6.96747973e-02, 6.76721195e-02, 6.64682490e-02,
+       6.64570415e-02, 6.46494066e-02, 6.53077131e-02, 6.70455961e-02,
+       6.75245053e-02, 6.81904329e-02, 7.04774606e-02, 7.26002491e-02,
+       8.20793827e-02, 8.28870772e-08])
 
-yyrb = np.array([-0.05544489, -0.0507309 , -0.04174753, -0.03358036, -0.02614719,
-       -0.01935555, -0.01316453, -0.00755603, -0.00245243,  0.00497426,
-        0.012563  ,  0.01795314,  0.02403169,  0.03088529,  0.03865124,
-        0.04744072,  0.05723254,  0.06818729,  0.0804908 ,  0.09413599,
-        0.10907809,  0.12501805,  0.14181528,  0.15955389,  0.17792796,
-        0.18716496])
+yyrb = np.array([-0.06505575, -0.05926936, -0.04815598, -0.03801091, -0.0288771 ,
+       -0.02078705, -0.01372019, -0.00760967, -0.00239193,  0.01365564,
+        0.04007607,  0.06414448,  0.08530825,  0.10369161,  0.12101227,
+        0.1373918 ,  0.15325944,  0.16857399,  0.18344781,  0.1982948 ,
+        0.21310704,  0.22776981,  0.2424686 ,  0.25737063,  0.27317241,
+        0.28153767])
 
     
 def eval_Li_evap_at_T_Cel(temperature):
@@ -42,45 +42,34 @@ def eval_Li_evap_at_T_Cel(temperature):
     return fluxEvap
 
 
-def count_files_in_folder(folder_path):
-    """Count the number of files in a folder."""
-    return len([file for file in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, file))])
-
 
 folders = {
+    
+    "nx_P2": r"C:\UEDGE_run_Shahinul\Nuclear_Fusion\Nuclear_Fusion\low_FX\low_FX\C_Li_omp",
+   # "nx_P3": r"C:\UEDGE_run_Shahinul\Nuclear_Fusion\Nuclear_Fusion\high_FX\PePi6.8MW\C_Li_omp",
 
-     
-      "nx_P1": r"C:\UEDGE_run_Shahinul\PET_2025\UEDGE_Wall_Li_scan\PePi5.8Kye0.01\C_Li_omp",
-      "nx_P2": r"C:\UEDGE_run_Shahinul\PET_2025\UEDGE_Wall_Li_scan\PePi5.8Kye0.01_new\C_Li_omp",
-      "nx_P3": r"C:\UEDGE_run_Shahinul\PET_2025\UEDGE_Wall_Li_scan\PePi6.4Kye0.04\C_Li_omp",
-      "nx_P4": r"C:\UEDGE_run_Shahinul\PET_2025\UEDGE_Wall_Li_scan\PePi7.2Kye0.1\C_Li_omp",
-      "nx_P5": r"C:\UEDGE_run_Shahinul\PET_2025\UEDGE_Wall_Li_scan\PePi7.8Kye0.16\C_Li_omp",
-      "nx_P6": r"C:\UEDGE_run_Shahinul\PET_2025\UEDGE_Wall_Li_scan\PePi9.6Kye0.26\C_Li_omp",
 }
 
+
+def count_files_in_folder(folder_path):
+    return len([file for file in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, file))])
 
 file_counts = {key: count_files_in_folder(path) for key, path in folders.items()}
 
 
-nx_P1, nx_P2, nx_P3, nx_P4, nx_P5, nx_P6 = file_counts.values()
-
 
 datasets = [
-
-      {'path': r'C:\UEDGE_run_Shahinul\PET_2025\UEDGE_Wall_Li_scan\PePi5.8Kye0.01', 'nx': nx_P1, 'dt': 10e-3, 'label_tsurf': r'P : 5.8 MW'},
-      {'path': r'C:\UEDGE_run_Shahinul\PET_2025\UEDGE_Wall_Li_scan\PePi5.8Kye0.01_new', 'nx': nx_P2, 'dt': 10e-3, 'label_tsurf': r'P : 5.8 MW-NoD'},
-      {'path': r'C:\UEDGE_run_Shahinul\PET_2025\UEDGE_Wall_Li_scan\PePi6.4Kye0.04', 'nx': nx_P3, 'dt': 10e-3, 'label_tsurf': r'P : 6.4 MW'},
-      {'path': r'C:\UEDGE_run_Shahinul\PET_2025\UEDGE_Wall_Li_scan\PePi7.2Kye0.1', 'nx': nx_P4, 'dt': 10e-3, 'label_tsurf': r'P : 7.2 MW'},
-      {'path': r'C:\UEDGE_run_Shahinul\PET_2025\UEDGE_Wall_Li_scan\PePi7.8Kye0.16', 'nx': nx_P5, 'dt': 10e-3, 'label_tsurf': r'P : 7.8 MW'},
-     {'path': r'C:\UEDGE_run_Shahinul\PET_2025\UEDGE_Wall_Li_scan\PePi9.6Kye0.26', 'nx': nx_P6, 'dt': 10e-3, 'label_tsurf': r'P : 9.6 MW'},
+    
+    {'path': r'C:\UEDGE_run_Shahinul\Nuclear_Fusion\Nuclear_Fusion\low_FX\low_FX',  'nx': file_counts["nx_P2"], 'dt': 10e-3,  'label_tsurf': r'P: 5.8MW'},
+  #  {'path': r'C:\UEDGE_run_Shahinul\Nuclear_Fusion\Nuclear_Fusion\high_FX\PePi6.8MW', 'nx': file_counts["nx_P3"], 'dt': 10e-3, 'label_tsurf': r'P: 6.8MW'},
+ 
 ]
 
 
-
-
-def process_dataset(data_path, nx, dt, sep=8, ixmp=76, sxnp=1.0, eval_Li_evap_at_T_Cel=None):
+def process_dataset(data_path, nx, dt, sep=8, ixmp=36, sxnp=1.0, eval_Li_evap_at_T_Cel=None):
+    
     max_value_tsurf, max_q, evap_flux_max, max_q_Li_list = [], [], [], []
-    C_Li_omp, Te, n_Li3, n_Li2, n_Li1, ne, phi_sput, evap, ad, total = [], [], [], [], [], [], [], [], [], []
+    C_Li_omp, Te, n_Li3, n_Li2, n_Li1, ne, phi_sput, evap, ad, total  = [], [], [], [], [], [], [], [], [], []
 
     dirs = {
         "q_perp": os.path.join(data_path, 'q_perp'),
@@ -112,53 +101,54 @@ def process_dataset(data_path, nx, dt, sep=8, ixmp=76, sxnp=1.0, eval_Li_evap_at
             "Total": os.path.join(dirs["Li"], f'Total_Li_flux_{i}.csv')
         }
 
-        # Defaults
-        max_tsurf = max_q_i = evap_flux = max_q_Li_i = np.nan
-        C_Li_i = Te_i = n_Li3_i = n_Li2_i = n_Li1_i = ne_i = phi_sput_i = evap_i = ad_i = total_i = np.nan
+        max_tsurf, max_q_i, evap_flux, max_q_Li_i = np.nan, np.nan, np.nan, np.nan
+        C_Li_i, Te_i, n_Li3_i, n_Li2_i, n_Li1_i = np.nan, np.nan, np.nan, np.nan, np.nan
+        ne_i, phi_sput_i, evap_i, ad_i, total_i = np.nan, np.nan, np.nan, np.nan, np.nan
 
         try:
+            # max surface temperature
             max_tsurf = np.max(pd.read_csv(filenames["tsurf"], header=None).values.astype(float))
+
+            # max heat flux
             max_q_i = np.max(pd.read_csv(filenames["qsurf"], header=None).values.astype(float))
+
+            # max lithium heat flux
             max_q_Li_i = np.max(pd.read_csv(filenames["qsurf_Li"], header=None).values.astype(float))
 
-            # C_Li parsing
+         
             df_C_Li = pd.read_csv(filenames["C_Li"], header=None)
             cell = df_C_Li.iloc[sep, 0]
+            C_Li_vals = np.array([float(x) for x in cell.split(',')])
+            C_Li_i = C_Li_vals  
 
-            if isinstance(cell, str):
-                C_Li_vals = np.array([float(x) for x in cell.split(',')])
-            elif isinstance(cell, (float, int, np.number)):
-                C_Li_vals = np.array([cell])
-            else:
-                raise ValueError(f"Unexpected C_Li cell type: {type(cell)}")
-
-            C_Li_i = C_Li_vals
-
-            # Te and Li densities
-            Te_data = pd.read_csv(filenames["Te"], header=None).apply(pd.to_numeric, errors='coerce').values
+            # Te: loadtxt usually expects clean csv with single floats per cell
+            Te_data = np.loadtxt(filenames["Te"], delimiter=',')
             Te_i = Te_data[ixmp, sep]
 
-            n_Li3_data = pd.read_csv(filenames["n_Li3"], header=None).apply(pd.to_numeric, errors='coerce').values
+            # n_Li3, n_Li2, n_Li1 (same parsing as Te)
+            n_Li3_data = np.loadtxt(filenames["n_Li3"], delimiter=',')
             n_Li3_i = n_Li3_data[ixmp, sep]
 
-            n_Li2_data = pd.read_csv(filenames["n_Li2"], header=None).apply(pd.to_numeric, errors='coerce').values
+            n_Li2_data = np.loadtxt(filenames["n_Li2"], delimiter=',')
             n_Li2_i = n_Li2_data[ixmp, sep]
 
-            n_Li1_data = pd.read_csv(filenames["n_Li1"], header=None).apply(pd.to_numeric, errors='coerce').values
+            n_Li1_data = np.loadtxt(filenames["n_Li1"], delimiter=',')
             n_Li1_i = n_Li1_data[ixmp, sep]
 
+            # electron density from .npy (numpy binary)
             ne_data = np.load(filenames["ne"])
-            ne_i = ne_data[ixmp, sep] if ne_data.ndim > 1 else ne_data[ixmp]
+            ne_i = ne_data[ixmp, sep]
 
+            # Sputtering fluxes, evaporation, etc. sum after multiplying by sxnp (assumed scalar or array)
             phi_sput_i = np.sum(np.loadtxt(filenames["PS"], delimiter=',') * sxnp)
             evap_i = np.sum(np.loadtxt(filenames["Evap"], delimiter=',') * sxnp)
             ad_i = np.sum(np.loadtxt(filenames["Ad"], delimiter=',') * sxnp)
             total_i = np.sum(np.loadtxt(filenames["Total"], delimiter=',') * sxnp)
 
         except FileNotFoundError as e:
-            print(f"[{i}] File not found: {e}")
+            print(f"File not found: {e}")
         except Exception as e:
-            print(f"[{i}] Error reading files: {e}")
+            print(f"Error reading files for index {i}: {e}")
 
         max_value_tsurf.append(max_tsurf)
         max_q.append(max_q_i)
@@ -166,28 +156,25 @@ def process_dataset(data_path, nx, dt, sep=8, ixmp=76, sxnp=1.0, eval_Li_evap_at
         C_Li_omp.append(C_Li_i)
         Te.append(Te_i)
         n_Li3.append(n_Li3_i + n_Li2_i + n_Li1_i)
-        n_Li2.append(n_Li2_i)
-        n_Li1.append(n_Li1_i)
         ne.append(ne_i)
         phi_sput.append(phi_sput_i)
         evap.append(evap_i)
         ad.append(ad_i)
         total.append(total_i)
-
- 
+        
     def replace_with_linear_interpolation(arr):
         arr = pd.Series(arr)
         arr_interpolated = arr.interpolate(method='linear', limit_direction='both')
-        return arr_interpolated.bfill().ffill().to_numpy()
+        return arr_interpolated.fillna(method='bfill').fillna(method='ffill').to_numpy()
 
     max_value_tsurf = replace_with_linear_interpolation(max_value_tsurf)
     max_q = replace_with_linear_interpolation(max_q)
     max_q_Li_list = replace_with_linear_interpolation(max_q_Li_list)
-
+    # For C_Li_omp, it's a list of numpy arrays; you may want to handle interpolation carefully
+    # Here, we skip interpolation for arrays or you can apply custom logic
+    # For now, just convert list of arrays to np array of objects
     C_Li_omp = np.array(C_Li_omp, dtype=object)
     n_Li3 = replace_with_linear_interpolation(n_Li3)
-    n_Li2 = replace_with_linear_interpolation(n_Li2)
-    n_Li1 = replace_with_linear_interpolation(n_Li1)
     Te = replace_with_linear_interpolation(Te)
     ne = replace_with_linear_interpolation(ne)
     phi_sput = replace_with_linear_interpolation(phi_sput)
@@ -195,28 +182,29 @@ def process_dataset(data_path, nx, dt, sep=8, ixmp=76, sxnp=1.0, eval_Li_evap_at
     ad = replace_with_linear_interpolation(ad)
     total = replace_with_linear_interpolation(total)
 
+    evap_flux_max = []
     if eval_Li_evap_at_T_Cel is None:
-        def eval_Li_evap_at_T_Cel(T): return np.nan
+        def eval_Li_evap_at_T_Cel(T):
+            return np.nan  # dummy fallback
 
     for max_tsurf in max_value_tsurf:
-        try:
-            evap_flux = eval_Li_evap_at_T_Cel(max_tsurf) if not np.isnan(max_tsurf) else np.nan
-        except Exception as e:
-            print(f"Evaporation evaluation error at T={max_tsurf}: {e}")
+        if not np.isnan(max_tsurf):
+            try:
+                evap_flux = eval_Li_evap_at_T_Cel(max_tsurf)
+            except Exception as e:
+                print(f"Error calculating evaporation flux: {e}")
+                evap_flux = np.nan
+        else:
             evap_flux = np.nan
         evap_flux_max.append(evap_flux)
 
     evap_flux_max = replace_with_linear_interpolation(evap_flux_max)
 
     q_surface = np.array(max_q) - 2.26e-19 * np.array(evap_flux_max)
+
     time_axis = dt * np.arange(1, len(max_q) + 1)
 
-    return (
-        max_value_tsurf, max_q, evap_flux_max, q_surface, time_axis,
-        max_q_Li_list, C_Li_omp, n_Li3, n_Li2, n_Li1, Te, ne,
-        phi_sput, evap, ad, total
-    )
-
+    return max_value_tsurf, max_q, evap_flux_max, q_surface, time_axis, max_q_Li_list, C_Li_omp, n_Li3, n_Li2, n_Li1, Te, ne, phi_sput, evap, ad, total
 
 
 
@@ -232,17 +220,16 @@ for idx, dataset in enumerate(datasets):
     ax2.plot(time_axis, max_value_tsurf, linestyle='-', linewidth=2, label=f'{dataset["label_tsurf"]}', color=colors[idx])
     ax3.plot(time_axis, C_Li_omp * 100, linestyle='-', linewidth=2, label=f'{dataset["label_tsurf"]}', color=colors[idx])
 
-ax1.set_ylabel('q$_{\perp}^{max}$ (MW/m$^2$)', fontsize=18)
+ax1.set_ylabel('q$_{s}^{max}$ (MW/m$^2$)', fontsize=18)
 ax1.set_xlim([0, 5])
 ax1.set_ylim([0, 10])
-
+ax1.legend(loc='best', fontsize=12, ncol=2)
 ax1.grid(True)
 ax1.tick_params(axis='both', labelsize=14)
 
 ax2.set_ylabel("T$_{surf}^{max}$ ($^\circ$C)", fontsize=18)
 ax2.set_ylim([0, 750])
 ax2.set_xlim([0, 5])
-ax2.legend(loc='best', fontsize=12, ncol=2)
 ax2.grid(True)
 ax2.tick_params(axis='both', labelsize=14)
 
@@ -266,14 +253,14 @@ for idx, dataset in enumerate(datasets):
         dataset['path'], dataset['nx'], dataset['dt']
     )
     
-    ax1.plot(time_axis, np.array(max_q) / 1e6, linestyle='-', linewidth=1.5,
+    ax1.plot(time_axis, np.array(max_q_Li) / 1e6, linestyle='-', linewidth=1.5,
              label=f'{dataset["label_tsurf"]}', color=colors[idx])
     
     ax2.plot(time_axis, max_value_tsurf, linestyle='-', linewidth=1.5,
              label=f'{dataset["label_tsurf"]}', color=colors[idx])
 
 # Axis labels and limits
-ax1.set_ylabel('q$_{\perp}^{max}$ (MW/m$^2$)', fontsize=14)
+ax1.set_ylabel('q$_{s}^{max}$ (MW/m$^2$)', fontsize=14)
 ax1.set_xlim([0, 1.5])
 ax1.set_ylim([0, 10])
 ax1.grid(True, which='both', linestyle='--', linewidth=0.5)
@@ -308,7 +295,7 @@ for idx, dataset in enumerate(datasets):
     color = colors[idx % len(colors)]
     
     
-    ax1.plot(time_axis, np.array(max_q) / 1e6, 
+    ax1.plot(time_axis, np.array(max_q_Li) / 1e6, 
              linestyle=style, linewidth=1.5,
              label=f'{dataset["label_tsurf"]}', color=color)
     
@@ -318,8 +305,8 @@ for idx, dataset in enumerate(datasets):
              label=f'{dataset["label_tsurf"]}', color=color)
 
 
-ax1.set_ylabel('q$_{\perp}^{max}$ (MW/m$^2$)', fontsize=14)
-ax1.set_xlim([0, 1])
+ax1.set_ylabel('q$_{s}^{max}$ (MW/m$^2$)', fontsize=14)
+ax1.set_xlim([0, 5])
 ax1.set_ylim([0, 10])
 ax1.grid(True, which='both', linestyle='--', linewidth=0.5)
 ax1.tick_params(axis='both', labelsize=12)
@@ -328,7 +315,7 @@ ax1.tick_params(axis='both', labelsize=12)
 ax2.set_ylabel("T$_{surf}^{max}$ ($^\circ$C)", fontsize=14)
 ax2.set_xlabel('t$_{simulation}$ (s)', fontsize=14)
 ax2.set_ylim([0, 750])
-ax2.set_xlim([0, 1])
+ax2.set_xlim([0, 5])
 ax2.legend(loc='best', fontsize=10, ncol=1)
 ax2.grid(True, which='both', linestyle='--', linewidth=0.5)
 ax2.tick_params(axis='both', labelsize=12)
@@ -546,11 +533,11 @@ for idx, dataset in enumerate(datasets):
     max_value_tsurf, max_q, evap_flux_max, q_surface, time_axis, max_q_Li, C_Li_omp, nLi3,  nLi2, nLi1, Te, ne, phi_sput, evap, ad, total = process_dataset(
         dataset['path'], dataset['nx'], dataset['dt']
     )
-    ax1.plot(time_axis, np.array(max_q) / 1e6, linestyle='-', linewidth=2, label=f'{dataset["label_tsurf"]}', color=colors[idx])
+    ax1.plot(time_axis, np.array(max_q_Li) / 1e6, linestyle='-', linewidth=2, label=f'{dataset["label_tsurf"]}', color=colors[idx])
     ax2.plot(time_axis, max_value_tsurf, linestyle='-', linewidth=2, label=f'{dataset["label_tsurf"]}', color=colors[idx])
     ax3.plot(time_axis, nLi3, linestyle='-', linewidth=2, label=f'{dataset["label_tsurf"]}', color=colors[idx])
 
-ax1.set_ylabel('q$_{\perp}^{max}$ (MW/m$^2$)', fontsize=18)
+ax1.set_ylabel('q$_{s}^{max}$ (MW/m$^2$)', fontsize=18)
 ax1.set_xlim([0, 5])
 ax1.set_ylim([0, 15])
 ax1.legend(loc='best', fontsize=12, ncol=2)
